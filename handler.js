@@ -2,14 +2,13 @@ console.log("Handler module launched!");
 //"use strict";
 //node js calls
 const {parse} = require('querystring');
-const fs = require("fs");
 
 //variables to use for data persistance
-var file = "data.json";
 var parsedData;
 var wrottenData;
 
 //more created modules
+const index = require("./index");
 const functions = require("./functions");
 const engine = require("./engine");
 
@@ -33,6 +32,11 @@ const header =  {'POST': {'Content-Type': 'text/plain', 'Access-Control-Allow-Or
 //   });
 // }
 
+//função criada só pra saber o que eu tô fazendo
+function convertToJson(reqData){
+  return
+}
+
 function writeJsonFile(file, data){
   //function called when needs to update the data
   fs.writeFile(file, JSON.stringify(data), (err) =>{
@@ -54,21 +58,23 @@ function writeJsonFile(file, data){
 //   });
 // }
 
+// if(!checkFileObj(dados)){
+//   console.log("user not registered, saving");
+//   saveInJsonFile(dados);
+// }else{
+//   console.log("user registered, loging in");
+// }
+
 //exported functions
 module.exports = {
     doPOST: (request,response,pathname) => {
+      let reqData = ""; //request data
       console.log("launched doPost function!");
-      let reqData = "";
-      request.on("data",(chunk) => {
+      request.on("data", (chunk) => {
         reqData += chunk;
         console.log("received data: " + reqData);
-        // if(!checkFileObj(dados)){
-        //   console.log("user not registered, saving");
-        //   saveInJsonFile(dados);
-        // }else{
-        //   console.log("user registered, loging in");
-        // }
       });
+      reqData = JSON.parse(reqData); //converting
       request.on('end', () => {
         //readJsonFile(reqData); retirado por motivo de ter maiores prioridades
         switch(pathname){
@@ -78,9 +84,11 @@ module.exports = {
             break;
           case "/ranking":
             console.log("ranking function will be called\n");
+            functions.ranking(reqData,response);
             break;
           case "/join":
             console.log("join function will be called\n");
+            functions.join(reqData,response);
             break;
           case "/leave":
             console.log("leave function will be called\n");
@@ -98,10 +106,20 @@ module.exports = {
       });
     },
     doGET: (request,response) => {
+      let reqData = ""; //data do request
+      console.log("launched doGET function!");
+      request.on("data", (chunk) => {
+        reqData += chunk;
+        console.log("received data: " + reqData);
+      });
       request.on("end", () => {
           response.writeHead(200, GETheader);
           response.write("get response\n");
           response.end("success");
+          if(parseUrl.pathname == '/'){
+            parseUrl.pathname = '/index.html';
+          }
+          index.doGetPathname1(parseUrl.pathname, response);
         });
     },
     doOptionsRequest: (request,response) => {
@@ -113,9 +131,10 @@ module.exports = {
       optionsHeaders["Access-Control-Allow-Methods"] = "POST, GET, PUT, OPTIONS";
       optionsHeaders["Access-Control-Allow-Credentials"] = false;
       optionsHeaders["Access-Control-Max-Age"] = '86400'; // 24 hours
-      //optionsHeaders["Access-Control-Allow-optionsHeaders"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept";
+      optionsHeaders["Access-Control-Allow-Headers"] = "*";
+      optionsHeaders["Access-Control-Allow-optionsHeaders"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept";
       response.writeHead(200, optionsHeaders);
-      response.end("Success");
+      response.end();
     }
 }
 //talvez eu venha a usar
