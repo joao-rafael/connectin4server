@@ -55,3 +55,47 @@ const server = http.createServer((request, response) => {
 
 //call of the startServer function
 startServer(port);
+
+//other functions - as shows in the slides:
+function getMediaType(pathname) {
+  const pos = pathname.lastIndexOf(".");
+  let mediaType;
+  if (pos !== -1) mediaType = conf.mediaTypes[pathname.substring(pos + 1)];
+  if (mediaType === undefined) mediaType = "text/plain";
+  return mediaType;
+}
+function isText(mediaType) {
+  if (mediaType.startsWith("image")) return false;
+  else return true;
+}
+
+//doGetPathname
+function doGetPathname(pathname, response) {
+  const mediaType = getMediaType(pathname);
+  const encoding = isText(mediaType) ? "utf8" : null;
+  fs.readFile(pathname, encoding, (err, data) => {
+    if (err) {
+      response.writeHead(404); // Not Found
+      response.end();
+    } else {
+      response.writeHead(200, { "Content-Type": mediaType });
+      response.end(data);
+    }
+  });
+}
+module.exports = {
+  doGetPathname1: (pathname, response) => {
+    console.log("Imported from Index");
+    const mediaType = getMediaType(pathname);
+    const encoding = isText(mediaType) ? "utf8" : null;
+    fs.readFile(pathname, encoding, (err, data) => {
+      if (err) {
+        response.writeHead(404); // Not Found
+        response.end();
+      } else {
+        response.writeHead(200, { "Content-Type": mediaType });
+        response.end(data);
+      }
+    });
+  }
+};

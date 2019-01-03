@@ -5,11 +5,11 @@ const { parse } = require("querystring");
 const fs = require("fs");
 
 //variables to use for data persistance
-var file = "data.json";
 var parsedData;
 var wrottenData;
 
 //more created modules
+const index = require("./index");
 const functions = require("./functions");
 const fileDatabase = require("./fileDatabase");
 const engine = require("./engine");
@@ -23,6 +23,13 @@ const header = {
     Connection: "keep-alive"
   }
 };
+
+// if(!checkFileObj(dados)){
+//   console.log("user not registered, saving");
+//   saveInJsonFile(dados);
+// }else{
+//   console.log("user registered, loging in");
+// }
 
 //exported functions
 module.exports = {
@@ -60,9 +67,11 @@ module.exports = {
             break;
           case "/ranking":
             console.log("ranking function will be called\n");
+            functions.ranking(reqData, response);
             break;
           case "/join":
             console.log("join function will be called\n");
+            functions.join(reqData, response);
             break;
           case "/leave":
             console.log("leave function will be called\n");
